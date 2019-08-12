@@ -24,7 +24,9 @@ class VQA2Dataset(BaseDataset):
             )
 
         self.imdb_file = imdb_files[dataset_type][imdb_file_index]
-        self.imdb_file = self._get_absolute_path(self.imdb_file)
+        print('imdb_files', imdb_files, flush=True)
+        self.imdb_file = 'data/' + self.imdb_file
+        #self.imdb_file = self._get_absolute_path(self.imdb_file)
         self.imdb = ImageDatabase(self.imdb_file)
 
         self.kwargs = kwargs
@@ -38,7 +40,6 @@ class VQA2Dataset(BaseDataset):
         if hasattr(self.config, "image_features"):
             self._use_features = True
             self.features_max_len = self.config.features_max_len
-            self._return_info = self.config.get("return_info", True)
 
             all_image_feature_dirs = self.config.image_features[dataset_type]
             curr_image_features_dir = all_image_feature_dirs[imdb_file_index]
@@ -52,7 +53,6 @@ class VQA2Dataset(BaseDataset):
                 max_features=self.features_max_len,
                 fast_read=self._should_fast_read,
                 imdb=self.imdb,
-                return_info=self._return_info,
             )
 
     def _get_absolute_path(self, paths):
@@ -98,10 +98,7 @@ class VQA2Dataset(BaseDataset):
         sample_info = self.imdb[idx]
         current_sample = Sample()
 
-        if "question_tokens" in sample_info:
-            text_processor_argument = {"tokens": sample_info["question_tokens"]}
-        else:
-            text_processor_argument = {"text": sample_info["question"]}
+        text_processor_argument = {"tokens": sample_info["question_tokens"]}
 
         processed_question = self.text_processor(text_processor_argument)
 

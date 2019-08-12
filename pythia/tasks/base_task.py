@@ -108,11 +108,12 @@ class BaseTask(Dataset):
                     sys.exit(1)
 
                 dataset_type = self.opts.get("dataset_type", "train")
-                builder_instance.build(dataset_type, attributes)
-                dataset_instance = builder_instance.load(dataset_type, attributes)
 
-                if dataset_instance is None:
-                    continue
+                if is_main_process():
+                    builder_instance.build(dataset_type, attributes)
+                synchronize()
+
+                dataset_instance = builder_instance.load(dataset_type, attributes)
 
                 self.builders.append(builder_instance)
                 self.datasets.append(dataset_instance)

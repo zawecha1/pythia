@@ -46,7 +46,8 @@ class Checkpoint:
 
         self.save_config()
         self.repo_path = updir(os.path.abspath(__file__), n=3)
-        self.repo = git.Repo(self.repo_path)
+        print("repo_path", self.repo_path)
+        self.repo = git.Repo('.')
 
     def save_config(self):
         cfg_file = os.path.join(self.ckpt_foldername, "config.yaml")

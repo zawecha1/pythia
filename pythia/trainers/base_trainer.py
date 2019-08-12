@@ -196,8 +196,7 @@ class BaseTrainer:
         self.writer.write(self.model)
 
         if "train" not in self.run_type:
-            self.inference()
-            return
+            return self.inference()
 
         should_break = False
 
@@ -257,6 +256,7 @@ class BaseTrainer:
 
         # Arguments should be a dict at this point
         model_output = self.model(prepared_batch)
+        print('model_output["captions"]', model_output['captions'])
         report = Report(prepared_batch, model_output)
         self.profile("Forward time")
 
@@ -382,6 +382,7 @@ class BaseTrainer:
 
         with torch.no_grad():
             self.model.eval()
+            print("in evaluate===============================================================")
             for batch in tqdm(loader, disable=not use_tqdm):
                 report = self._forward_pass(batch)
                 self._update_meter(report, meter, eval_mode=True)
@@ -418,7 +419,7 @@ class BaseTrainer:
             self._inference_run("val")
 
         if "inference" in self.run_type or "predict" in self.run_type:
-            self._inference_run("test")
+            return self._inference_run("test")
 
     def _inference_run(self, dataset_type):
         if self.config.training_parameters.evalai_inference is True:
@@ -432,6 +433,8 @@ class BaseTrainer:
         )
         prefix = "{}: full {}".format(report.dataset_name, dataset_type)
         self._summarize_report(meter, prefix)
+        
+        return report
 
     def _calculate_time_left(self):
         time_taken_for_log = time.time() * 1000 - self.train_timer.start

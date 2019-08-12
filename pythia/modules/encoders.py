@@ -35,9 +35,9 @@ class FinetuneFasterRcnnFpnFc7(nn.Module):
         model_data_dir = os.path.join(pythia_root, model_data_dir)
 
         if not os.path.isabs(weights_file):
-            weights_file = os.path.join(model_data_dir, weights_file)
+            weights_file = os.path.join("data", weights_file)
         if not os.path.isabs(bias_file):
-            bias_file = os.path.join(model_data_dir, bias_file)
+            bias_file = os.path.join('data', bias_file)
         with open(weights_file, "rb") as w:
             weights = pickle.load(w)
         with open(bias_file, "rb") as b:

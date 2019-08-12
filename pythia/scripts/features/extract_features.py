@@ -43,16 +43,17 @@ import caffe2
 import cv2  # NOQA (Must import before importing caffe2 due to bug in cv2)
 import numpy as np
 from caffe2.python import workspace
-
-import common.test_engine as infer_engine
-import datasets.dummy_datasets as dummy_datasets
-import utils.c2 as c2_utils
-import utils.logging
-import utils.vis as vis_utils
-from common.config import assert_and_infer_cfg, cfg, merge_cfg_from_file
-from utils.boxes import nms
-from utils.io import cache_url
-from utils.timer import Timer
+import detectron.core.test_engine as infer_engine
+from detectron.core.test import im_detect_bbox
+#import common.test_engine as infer_engine
+import detectron.datasets.dummy_datasets as dummy_datasets
+import detectron.utils.c2 as c2_utils
+import detectron.utils.logging
+import detectron.utils.vis as vis_utils
+from detectron.core.config import assert_and_infer_cfg, cfg, merge_cfg_from_file
+from detectron.utils.boxes import nms
+from detectron.utils.io import cache_url
+from detectron.utils.timer import Timer
 
 c2_utils.import_detectron_ops()
 # OpenCL may be enabled by default in OpenCV3; disable it because it's not
@@ -172,8 +173,8 @@ def get_detections_from_im(
     bboxes=None,
 ):
 
-    with c2_utils.NamedCudaScope(0):
-        scores, cls_boxes, im_scale = infer_engine.im_detect_bbox(
+    with c2_utils.NamedCudaScope(0):#mod by zhang ,del infer_engine
+        scores, cls_boxes, im_scale = im_detect_bbox(
             model, im, cfg.TEST.SCALE, cfg.TEST.MAX_SIZE, boxes=bboxes
         )
         box_features = workspace.FetchBlob(feat_blob_name)
@@ -259,49 +260,62 @@ def main(args):
     count = 0
     if not os.path.exists(args.output_dir):
         os.makedirs(args.output_dir)
+        
+    imdb=np.zeros(1 + len(im_list), dtype=object)
+    imdb[0]={'metadata': 'coco'}
+    print("im_list", im_list)
 
     for i, im_name in enumerate(im_list):
         im_base_name = os.path.basename(im_name)
-        image_id = int(im_base_name.split(".")[0].split("_")[-1])  # for COCO
-        if image_id % args.total_group == args.group_id:
-            bbox = image_bboxes[image_id] if image_id in image_bboxes else None
-            im = cv2.imread(im_name)
-            if im is not None:
-                outfile = os.path.join(
-                    args.output_dir, im_base_name.replace("jpg", "npy")
-                )
-                lock_folder = outfile.replace("npy", "lock")
-                if not os.path.exists(lock_folder) and os.path.exists(outfile):
-                    continue
-                if not os.path.exists(lock_folder):
-                    os.makedirs(lock_folder)
+        try:
+            image_id = int(im_base_name.split(".")[0].split("_")[-1])  # for COCO
+        except:
+            image_id = 0
+        print('image_id', image_id, ',no use args.group_id', args.group_id)
 
-                result = get_detections_from_im(
-                    cfg,
-                    model,
-                    im,
-                    image_id,
-                    args.feat_name,
-                    args.min_bboxes,
-                    args.max_bboxes,
-                    background=args.background,
-                    bboxes=bbox,
-                )
+        bbox = image_bboxes[image_id] if image_id in image_bboxes else None
+        im = cv2.imread(im_name)
+        if im is not None:
+            outfile = os.path.join(
+                args.output_dir, im_base_name.replace("jpg", "npy")
+            )
+            lock_folder = outfile.replace("npy", "lock")
 
-                np.save(outfile, result)
-                os.rmdir(lock_folder)
+            if not os.path.exists(lock_folder):
+                os.makedirs(lock_folder)
+            
+            result = get_detections_from_im(
+                cfg,
+                model,
+                im,
+                image_id,
+                args.feat_name,
+                args.min_bboxes,
+                args.max_bboxes,
+                background=args.background,
+                bboxes=bbox,
+            )
 
-            count += 1
+            np.save(outfile, result)
+            imdb[i + 1]={'feature_path': im_base_name.replace("jpg", "npy"), 'image_id':image_id, 'reference_tokens': [['<s>']]}
+            os.rmdir(lock_folder)
 
-            if count % 100 == 0:
-                end = timeit.default_timer()
-                epoch_time = end - start
-                print("process {:d} images after {:.1f} s".format(count, epoch_time))
+        count += 1
+
+        if count % 100 == 0:
+            end = timeit.default_timer()
+            epoch_time = end - start
+            print("process {:d} images after {:.1f} s".format(count, epoch_time))
+    
+    imdbfile = os.path.join(args.output_dir, '../imdb/coco_captions/imdb_karpathy_test.npy')
+    np.save(imdbfile, imdb)
+    print("imdb",imdb)
+    print("save imdbfile to", imdbfile)
 
 
 if __name__ == "__main__":
     workspace.GlobalInit(["caffe2", "--caffe2_log_level=0"])
-    utils.logging.setup_logging(__name__)
+    detectron.utils.logging.setup_logging(__name__)
     args = parse_args()
     if args.group_id >= args.total_group:
         exit(

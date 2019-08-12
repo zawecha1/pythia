@@ -33,5 +33,5 @@ with open("./COCO/060817/annotations/instances_val2014.json") as f:
         filepath = os.path.join("val2014/", item["file_name"])
         image_paths.append(filepath)
 
-pool = ThreadPool(10)
+pool = ThreadPool(1)
 results = pool.map(mirror_image, image_paths)

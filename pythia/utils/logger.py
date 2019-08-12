@@ -23,7 +23,7 @@ class Logger:
         self.save_dir = config.training_parameters.save_dir
         self.log_folder = ckpt_name_from_core_args(config)
         self.log_folder += foldername_from_config_override(config)
-        time_format = "%Y-%m-%dT%H:%M:%S"
+        time_format = "%Y-%m-%dT%H-%M-%S"
         self.log_filename = ckpt_name_from_core_args(config) + "_"
         self.log_filename += self.timer.get_time_hhmmss(None, format=time_format)
         self.log_filename += ".log"

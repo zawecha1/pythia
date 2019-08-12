@@ -5,8 +5,8 @@ from torch import distributed as dist
 
 
 def synchronize():
-    if not dist.is_nccl_available():
-        return
+#    if not dist.is_nccl_available():
+    return
     if not dist.is_initialized():
         return
 
@@ -19,8 +19,8 @@ def synchronize():
 
 
 def get_rank():
-    if not dist.is_nccl_available():
-        return 0
+#    if not dist.is_nccl_available():
+    return 0
     if not dist.is_initialized():
         return 0
     return dist.get_rank()
@@ -31,8 +31,8 @@ def is_main_process():
 
 
 def get_world_size():
-    if not dist.is_nccl_available():
-        return 1
+#    if not dist.is_nccl_available():
+    return 1
     if not dist.is_initialized():
         return 1
     return dist.get_world_size()

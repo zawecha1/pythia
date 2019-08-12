@@ -68,13 +68,9 @@ def tokenize(sentence, regex=SENTENCE_SPLIT_REGEX, keep=["'s"], remove=[",", "?"
     return tokens
 
 
-def word_tokenize(word, remove=[",", "?"]):
+def word_tokenize(word):
     word = word.lower()
-
-    for item in remove:
-        word = word.replace(item, "")
-    word = word.replace("'s", " 's")
-
+    word = word.replace(",", "").replace("?", "").replace("'s", " 's")
     return word.strip()
 
 
@@ -95,7 +91,7 @@ class VocabDict:
         if not os.path.isabs(vocab_file) and data_root_dir is not None:
             pythia_root = get_pythia_root()
             vocab_file = os.path.abspath(
-                os.path.join(pythia_root, data_root_dir, vocab_file)
+                os.path.join("data", vocab_file)
             )
 
         if not os.path.exists(vocab_file):

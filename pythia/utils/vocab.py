@@ -116,7 +116,7 @@ class BaseVocab:
         if vocab_file is not None:
             if not os.path.isabs(vocab_file) and data_root_dir is not None:
                 pythia_root = get_pythia_root()
-                vocab_file = os.path.join(pythia_root, data_root_dir, vocab_file)
+                vocab_file = os.path.join('data', vocab_file)
             if not os.path.exists(vocab_file):
                 raise RuntimeError("Vocab not found at " + vocab_file)
 
@@ -291,7 +291,7 @@ class IntersectedVocab(BaseVocab):
         if name == "glove":
             params.append(int(dim))
 
-        vector_cache = os.path.join(get_pythia_root(), ".vector_cache")
+        vector_cache = os.path.join('pythia', ".vector_cache")
         embedding = getattr(vocab, class_name)(*params, cache=vector_cache)
 
         self.vectors = torch.empty(
@@ -338,7 +338,7 @@ class PretrainedVocab(BaseVocab):
                 writer.write(error, "error")
             raise RuntimeError(error)
 
-        vector_cache = os.path.join(get_pythia_root(), ".vector_cache")
+        vector_cache = os.path.join('pythia', ".vector_cache")
 
         embedding = vocab.pretrained_aliases[embedding_name](cache=vector_cache)
 

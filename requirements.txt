@@ -9,5 +9,5 @@ GitPython>=2.1
 PyYAML>=3.11
 pytest==3.3.2
 requests==2.21.0
-fastText
+fasttext
 nltk==3.4.1

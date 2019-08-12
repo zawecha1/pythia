@@ -134,7 +134,7 @@ class Configuration:
             pythia_root_dir = get_pythia_root()
 
             for include in includes:
-                include = os.path.join(pythia_root_dir, include)
+                include = os.path.join('pythia', include)
                 current_include_mapping = self.load_yaml(include)
                 include_mapping = self.nested_dict_update(
                     include_mapping, current_include_mapping
@@ -310,9 +310,10 @@ class Configuration:
         )
 
     def _get_default_config_path(self):
-        directory = os.path.dirname(os.path.abspath(__file__))
+        #directory = os.path.dirname(os.path.basename(__file__))
+        #print('directory', directory)
         return os.path.join(
-            directory, "..", "common", "defaults", "configs", "base.yml"
+            "pythia", "common", "defaults", "configs", "base.yml"
         )
 
     def _update_specific(self, args):
