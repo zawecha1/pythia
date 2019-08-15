@@ -201,11 +201,8 @@ def run():
         trainer.load()
         res = trainer.train()
         cap=res['captions'].cpu().numpy()[0]
-        print("tools run res['captions']", cap)
-        
-        for i in cap[1:-1]:
-            print(vob.itos[int(i)] + " ", end='')
-        print('finish')
+        resS = [vob.itos[int(i)] for i in cap[1:-1]]
+        print(" ".join(resS))
     except Exception as e:
         import traceback
         traceback.print_exc()

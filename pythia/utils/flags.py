@@ -136,6 +136,13 @@ class Flags:
             help="File from which to resume checkpoint",
         )
         self.parser.add_argument(
+            "--imdb_file_content",
+            type=str,
+            default=None,
+            help="File from which to predict",
+        )
+        
+        self.parser.add_argument(
             "--resume",
             type=bool,
             default=None,

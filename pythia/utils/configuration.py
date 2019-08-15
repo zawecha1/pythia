@@ -103,6 +103,7 @@ class Configuration:
 
         base_config = self.load_yaml(self.default_config)
 
+        base_config['imdb_file_content']=None
         user_config = {}
 
         if self.config_path is not None:

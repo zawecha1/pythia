@@ -10,6 +10,7 @@ from pythia.tasks.features_dataset import FeaturesDataset
 from pythia.tasks.image_database import ImageDatabase
 from pythia.utils.distributed_utils import is_main_process
 from pythia.utils.general import get_pythia_root
+import numpy as np
 
 
 class VQA2Dataset(BaseDataset):
@@ -24,8 +25,19 @@ class VQA2Dataset(BaseDataset):
             )
 
         self.imdb_file = imdb_files[dataset_type][imdb_file_index]
-        print('imdb_files', imdb_files, flush=True)
-        self.imdb_file = 'data/' + self.imdb_file
+        if self.imdb_file.endswith("imdb_karpathy_test.npy") and self._global_config['imdb_file_content'] is not None:
+            if not self.imdb_file.startswith("data"):
+                self.imdb_file="data/" + os.path.dirname(self.imdb_file) + "/imdb_" + self._global_config['imdb_file_content']
+            else:
+                self.imdb_file=os.path.dirname(self.imdb_file) + "/imdb_" + self._global_config['imdb_file_content']
+            imdb=np.zeros(2, dtype=object)
+            imdb[0]={'metadata': 'coco'}
+            imdb[1]={'feature_path': self._global_config['imdb_file_content'], 'image_id':0, 'reference_tokens': [['<s>']]}
+            np.save(self.imdb_file, imdb)
+            print('imdb_files', imdb_files, flush=True)
+
+        if not self.imdb_file.startswith("data"):
+            self.imdb_file = 'data/' + self.imdb_file
         #self.imdb_file = self._get_absolute_path(self.imdb_file)
         self.imdb = ImageDatabase(self.imdb_file)
 

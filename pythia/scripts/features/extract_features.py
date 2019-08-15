@@ -66,7 +66,7 @@ c2_utils.import_detectron_ops()
 # thread safe and causes unwanted GPU memory allocations.
 cv2.ocl.setUseOpenCL(False)
 
-csv.field_size_limit(sys.maxsize)
+#csv.field_size_limit(sys.maxsize)
 
 BOTTOM_UP_FIELDNAMES = [
     "image_id",
@@ -178,8 +178,8 @@ def get_detections_from_im(
             model, im, cfg.TEST.SCALE, cfg.TEST.MAX_SIZE, boxes=bboxes
         )
         box_features = workspace.FetchBlob(feat_blob_name)
-        cls_prob = workspace.FetchBlob("gpu_0/cls_prob")
-        rois = workspace.FetchBlob("gpu_0/rois")
+        cls_prob = workspace.FetchBlob("cpu_0/cls_prob")
+        rois = workspace.FetchBlob("cpu_0/rois")
         max_conf = np.zeros((rois.shape[0]))
         # unscale back to raw image space
         cls_boxes = rois[:, 1:5] / im_scale
@@ -241,7 +241,7 @@ def extract_bboxes(bottom_up_csv_file):
 def main(args):
     logger = logging.getLogger(__name__)
     merge_cfg_from_file(args.cfg)
-    cfg.NUM_GPUS = 1
+    cfg.NUM_GPUS = 0#1
     args.weights = cache_url(args.weights, cfg.DOWNLOAD_CACHE)
     assert_and_infer_cfg(cache_urls=False)
     model = infer_engine.initialize_model_from_cfg(args.weights)
